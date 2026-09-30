@@ -166,73 +166,125 @@ void drawSquare(HDC hdc, unsigned column, unsigned row) {
     }
 }
 
-bool isWhitePiese(int id) {
+bool isWhitePiece(int id) {
     return id >= WHITE_PAWN && id <= WHITE_KING;
 }
 
-bool isBlackPiese(int id) {
+bool isBlackPiece(int id) {
     return id >= BLACK_PAWN && id <= BLACK_KING;
 }
 
-vector<pair<int, int>> getPossibleMoves(unsigned column, unsigned row) {
+vector<pair<int, int>> getPawnMoves(unsigned column, unsigned row, bool isWhite) {
     vector<pair<int, int>> possibleMoves;
 
-    if (whiteTurn && board[column][row] == WHITE_PAWN) {
+    if (isWhite) {
         if (row > 0 && board[column][row - 1] == 0) {
             possibleMoves.push_back({column, row - 1});
             if (row == 6 && board[column][row - 2] == 0) {
                 possibleMoves.push_back({column, row - 2});
             }
         }
-        if (column < 7 && row > 0 && isBlackPiese(board[column + 1][row - 1])) {
+        if (column < 7 && row > 0 && isBlackPiece(board[column + 1][row - 1])) {
             possibleMoves.push_back({column + 1, row - 1});
         }
-        if (column > 0 && row > 0 && isBlackPiese(board[column - 1][row - 1])) {
+        if (column > 0 && row > 0 && isBlackPiece(board[column - 1][row - 1])) {
             possibleMoves.push_back({column - 1, row - 1});
         }
         //PROMOTE to..
         //TBI en passant
-        return possibleMoves;
-    } 
-    /*else if (board[column][row] == WHITE_KNIGHT) {
-        return whiteKnight;
-    } else if (board[column][row] == WHITE_BISHOP) {
-        return whiteBishop;
-    } else if (board[column][row] == WHITE_ROOK) {
-        return whiteRook;
-    } else if (board[column][row] == WHITE_QUEEN) {
-        return whiteQueen;
-    } else if (board[column][row] == WHITE_KING) {
-        return whiteKing;
-    }*/ else if (!whiteTurn && board[column][row] == BLACK_PAWN) {
+    } else {
         if (row < 7 && board[column][row + 1] == 0) {
             possibleMoves.push_back({column, row + 1});
             if (row == 1 && board[column][row + 2] == 0) {
                 possibleMoves.push_back({column, row + 2});
             }
         }
-        if (column < 7 && row <7 && isWhitePiese(board[column + 1][row + 1])) {
+        if (column < 7 && row <7 && isWhitePiece(board[column + 1][row + 1])) {
             possibleMoves.push_back({column + 1, row + 1});
         }
-        if (column > 0 && row <7 && isWhitePiese(board[column - 1][row + 1])) {
+        if (column > 0 && row <7 && isWhitePiece(board[column - 1][row + 1])) {
             possibleMoves.push_back({column - 1, row + 1});
         }
         //PROMOTE to..
         //TBI en passant
-        return possibleMoves;
-    } 
-    /*else if (board[column][row] == BLACK_KNIGHT) {
-        return blackKnight;
-    } else if (board[column][row] == BLACK_BISHOP) {
-        return blackBishop;
-    } else if (board[column][row] == BLACK_ROOK) {
-        return blackRook;
-    } else if (board[column][row] == BLACK_QUEEN) {
-        return blackQueen;
-    } else if (board[column][row] == BLACK_KING) {
-        
-    }*/
+    }
     return possibleMoves;
+}
+
+vector<pair<int, int>> getKnightMoves(unsigned column, unsigned row, bool isWhite) {
+    vector<pair<int, int>> possibleMoves;
+
+    if (isWhite) {
+        if (column < 7 && row > 1 && !isWhitePiece(board[column + 1][row - 2])) {
+            possibleMoves.push_back({column + 1, row - 2});
+        }
+        if (column < 6 && row > 0 && !isWhitePiece(board[column + 2][row - 1])) {
+            possibleMoves.push_back({column + 2, row - 1});
+        }
+        if (column < 6 && row < 7 && !isWhitePiece(board[column + 2][row + 1])) {
+            possibleMoves.push_back({column + 2, row + 1});
+        }
+        if (column < 7 && row < 6 && !isWhitePiece(board[column + 1][row + 2])) {
+            possibleMoves.push_back({column + 1, row + 2});
+        }
+        if (column > 0 && row < 6 && !isWhitePiece(board[column - 1][row + 2])) {
+            possibleMoves.push_back({column - 1, row + 2});
+        }
+        if (column > 1 && row < 7 && !isWhitePiece(board[column - 2][row + 1])) {
+            possibleMoves.push_back({column - 2, row + 1});
+        }
+        if (column > 1 && row > 0 && !isWhitePiece(board[column - 2][row - 1])) {
+            possibleMoves.push_back({column - 2, row - 1});
+        }
+        if (column > 0 && row > 1 && !isWhitePiece(board[column - 1][row - 2])) {
+            possibleMoves.push_back({column - 1, row - 2});
+        }
+    } else {
+        if (column < 7 && row > 1 && !isBlackPiece(board[column + 1][row - 2])) {
+            possibleMoves.push_back({column + 1, row - 2});
+        }
+        if (column < 6 && row > 0 && !isBlackPiece(board[column + 2][row - 1])) {
+            possibleMoves.push_back({column + 2, row - 1});
+        }
+        if (column < 6 && row < 7 && !isBlackPiece(board[column + 2][row + 1])) {
+            possibleMoves.push_back({column + 2, row + 1});
+        }
+        if (column < 7 && row < 6 && !isBlackPiece(board[column + 1][row + 2])) {
+            possibleMoves.push_back({column + 1, row + 2});
+        }
+        if (column > 0 && row < 6 && !isBlackPiece(board[column - 1][row + 2])) {
+            possibleMoves.push_back({column - 1, row + 2});
+        }
+        if (column > 1 && row < 7 && !isBlackPiece(board[column - 2][row + 1])) {
+            possibleMoves.push_back({column - 2, row + 1});
+        }
+        if (column > 1 && row > 0 && !isBlackPiece(board[column - 2][row - 1])) {
+            possibleMoves.push_back({column - 2, row - 1});
+        }
+        if (column > 0 && row > 1 && !isBlackPiece(board[column - 1][row - 2])) {
+            possibleMoves.push_back({column - 1, row - 2});
+        }
+    }
+    return possibleMoves;
+}
+
+vector<pair<int, int>> getPossibleMoves(unsigned column, unsigned row) {
+    if (whiteTurn) {
+        if (board[column][row] == WHITE_PAWN) {
+            return getPawnMoves(column, row, true);
+        }
+        if (board[column][row] == WHITE_KNIGHT) {
+            return getKnightMoves(column, row, true);
+        }
+    } else {
+        if (board[column][row] == BLACK_PAWN) {
+            return getPawnMoves(column, row, false);
+        }
+        if (board[column][row] == BLACK_KNIGHT) {
+            return getKnightMoves(column, row, true);
+        }
+    }
+    return {};
 }
 
 void drawCoordinates(HDC hdc) {
