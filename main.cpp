@@ -1,21 +1,27 @@
 #include <windows.h>
 #include <gdiplus.h>
+#include <vector>
 #include "resources.h"
 
 using namespace Gdiplus;
+using namespace std;
 
 #define window_width 1200
 #define window_height 800
-#define box_width 70
+
+#define box_width 80
 #define board_xPos (window_width - 8 * box_width) / 2
 #define board_yPos (window_height - 8 * box_width) / 2
 
 #define GREEN RGB(107, 142, 78)
-#define WHITE RGB(245, 245, 245)
-#define YELLOW RGB(253, 228, 80)
+#define NUDE RGB(254, 230, 196)
+#define BROWN RGB(100, 72, 60)
 
+vector<pair<int, int>> possibleMoves;
 short selectedColumn = -1;
 short selectedRow = -1;
+
+bool whiteTurn = 1;
 
 Gdiplus::Image* whitePawn = nullptr;
 Gdiplus::Image* whiteKnight = nullptr;
@@ -30,6 +36,11 @@ Gdiplus::Image* blackKnight = nullptr;
 Gdiplus::Image* blackBishop = nullptr;
 Gdiplus::Image* blackQueen = nullptr;
 Gdiplus::Image* blackKing = nullptr;
+
+//----
+void drawSquare(HDC hdc, unsigned column, unsigned row);
+//--
+
 
 int board[8][8];
 
@@ -101,6 +112,210 @@ Gdiplus::Image* getPieceImage(int id) {
     return nullptr;
 }
 
+void drawOuter(HDC hdc) {
+    HBRUSH brown  = CreateSolidBrush(BROWN);
+    RECT rect;
+    rect.left = board_xPos - 0.8 * box_width;
+    rect.top = board_yPos - 0.8 * box_width;
+    rect.right = board_xPos + 8.8 * box_width;
+    rect.bottom = board_yPos + 8.8 * box_width;
+
+    FillRect(hdc, &rect, brown);
+    DeleteObject(brown);
+}
+
+void drawInner(HDC hdc) {
+    HBRUSH nude  = CreateSolidBrush(NUDE);
+    RECT rect;
+    rect.left = board_xPos - 0.1 * box_width;
+    rect.top = board_yPos - 0.1 * box_width;
+    rect.right = board_xPos + 8.1 * box_width;
+    rect.bottom = board_yPos + 8.1 * box_width;
+
+    FillRect(hdc, &rect, nude);
+    DeleteObject(nude);
+}
+
+void drawSquare(HDC hdc, unsigned column, unsigned row) {
+    Gdiplus::Graphics graphics(hdc);
+    RECT rect;
+    rect.left = board_xPos + box_width * column;
+    rect.top = board_yPos + box_width * row;
+    rect.right = board_xPos + box_width * (column + 1);
+    rect.bottom = board_yPos + box_width * (row + 1);
+    if (column == selectedColumn && row == selectedRow && board[column][row] != 0) {
+        HBRUSH green = CreateSolidBrush(GREEN);
+        FillRect(hdc, &rect, green);
+        DeleteObject(green);
+    } else if ((column % 2 == 0 && row % 2 == 0) || (column % 2 !=0 && row % 2 != 0)) {
+        HBRUSH nude  = CreateSolidBrush(NUDE);
+        FillRect(hdc, &rect, nude);
+        DeleteObject(nude);
+    } else {
+        HBRUSH brown  = CreateSolidBrush(BROWN);
+        FillRect(hdc, &rect, brown);
+        DeleteObject(brown);
+    }
+
+    // Put icon
+    if (board[column][row] != 0) {
+        Gdiplus::Image* current = getPieceImage(board[column][row]);
+        if (current != nullptr) {
+            graphics.DrawImage(current, rect.left, rect.top, box_width, box_width);
+        }
+    }
+}
+
+bool isWhitePiese(int id) {
+    return id >= WHITE_PAWN && id <= WHITE_KING;
+}
+
+bool isBlackPiese(int id) {
+    return id >= BLACK_PAWN && id <= BLACK_KING;
+}
+
+vector<pair<int, int>> getPossibleMoves(unsigned column, unsigned row) {
+    vector<pair<int, int>> possibleMoves;
+
+    if (whiteTurn && board[column][row] == WHITE_PAWN) {
+        if (row > 0 && board[column][row - 1] == 0) {
+            possibleMoves.push_back({column, row - 1});
+            if (row == 6 && board[column][row - 2] == 0) {
+                possibleMoves.push_back({column, row - 2});
+            }
+        }
+        if (column < 7 && row > 0 && isBlackPiese(board[column + 1][row - 1])) {
+            possibleMoves.push_back({column + 1, row - 1});
+        }
+        if (column > 0 && row > 0 && isBlackPiese(board[column - 1][row - 1])) {
+            possibleMoves.push_back({column - 1, row - 1});
+        }
+        //PROMOTE to..
+        //TBI en passant
+        return possibleMoves;
+    } 
+    /*else if (board[column][row] == WHITE_KNIGHT) {
+        return whiteKnight;
+    } else if (board[column][row] == WHITE_BISHOP) {
+        return whiteBishop;
+    } else if (board[column][row] == WHITE_ROOK) {
+        return whiteRook;
+    } else if (board[column][row] == WHITE_QUEEN) {
+        return whiteQueen;
+    } else if (board[column][row] == WHITE_KING) {
+        return whiteKing;
+    }*/ else if (!whiteTurn && board[column][row] == BLACK_PAWN) {
+        if (row < 7 && board[column][row + 1] == 0) {
+            possibleMoves.push_back({column, row + 1});
+            if (row == 1 && board[column][row + 2] == 0) {
+                possibleMoves.push_back({column, row + 2});
+            }
+        }
+        if (column < 7 && row <7 && isWhitePiese(board[column + 1][row + 1])) {
+            possibleMoves.push_back({column + 1, row + 1});
+        }
+        if (column > 0 && row <7 && isWhitePiese(board[column - 1][row + 1])) {
+            possibleMoves.push_back({column - 1, row + 1});
+        }
+        //PROMOTE to..
+        //TBI en passant
+        return possibleMoves;
+    } 
+    /*else if (board[column][row] == BLACK_KNIGHT) {
+        return blackKnight;
+    } else if (board[column][row] == BLACK_BISHOP) {
+        return blackBishop;
+    } else if (board[column][row] == BLACK_ROOK) {
+        return blackRook;
+    } else if (board[column][row] == BLACK_QUEEN) {
+        return blackQueen;
+    } else if (board[column][row] == BLACK_KING) {
+        
+    }*/
+    return possibleMoves;
+}
+
+void drawCoordinates(HDC hdc) {
+    SetBkMode(hdc, TRANSPARENT);
+    SetTextColor(hdc, NUDE);
+
+    HFONT font = CreateFontW(
+        24,
+        0,
+        0,
+        0,
+        FW_BOLD,
+        FALSE,
+        FALSE,
+        FALSE,
+        DEFAULT_CHARSET,
+        OUT_DEFAULT_PRECIS,
+        CLIP_DEFAULT_PRECIS,
+        DEFAULT_QUALITY,
+        DEFAULT_PITCH | FF_DONTCARE,
+        L"Arial"
+    );
+
+    HFONT oldFont = (HFONT)SelectObject(hdc, font);
+
+    const wchar_t letters[] = L"abcdefgh";
+
+    for (int i = 0; i < 8; ++i) {
+        int x = board_xPos + i * box_width + box_width / 2 - 7;
+        int y = board_yPos + 8 * box_width + 10;
+
+        TextOutW(hdc, x, y, &letters[i], 1);
+    }
+
+    // Skaičiai kairėje
+    for (int i = 0; i < 8; ++i) {
+        wchar_t number = L'8' - i;
+
+        int x = board_xPos - 25;
+        int y = board_yPos + i * box_width + box_width / 2 - 12;
+
+        TextOutW(hdc, x, y, &number, 1);
+    }
+
+    SelectObject(hdc, oldFont);
+    DeleteObject(font);
+}
+
+void drawPossibleMove(HDC hdc, vector<pair<int, int>> possibleMoves) {
+    Gdiplus::Graphics graphics(hdc);
+    Gdiplus::SolidBrush brown(Gdiplus::Color(150, 0, 0, 0));
+
+    for (auto move : possibleMoves) {
+        int column = move.first;
+        int row = move.second;
+
+        int centerX = board_xPos + (column + 0.5) * box_width;
+        int centerY = board_yPos + (row + 0.5) * box_width;
+
+        graphics.FillEllipse(&brown, centerX - 10,centerY - 10, 20, 20);
+    }
+    //DeleteObject(brown);
+}
+
+void makeMove(HDC hdc, vector<pair<int, int>> possibleMoves, unsigned prevColumn, unsigned prevRow, unsigned newColumn, unsigned newRow){
+    // delete previous possible moves
+    for (auto move : possibleMoves) {
+        drawSquare(hdc, move.first, move.second);
+    }
+
+    // make move
+    for (auto move : possibleMoves){
+        if (move.first == newColumn && move.second == newRow) {
+            board[newColumn][newRow] = board[prevColumn][prevRow];
+            board[prevColumn][prevRow] = 0;
+            drawSquare(hdc, newColumn, newRow);
+            drawSquare(hdc, prevColumn, prevRow);
+
+            whiteTurn = !whiteTurn;
+        }
+    }
+}
+
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
@@ -110,53 +325,48 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             return 0;
         case WM_LBUTTONDOWN:
         {
-            short column = getColumn(lParam);
-            short row = getRow(lParam);
-            if (column != -1 && row != -1) {
-                selectedColumn = column;
-                selectedRow = row;
-                InvalidateRect(hwnd, NULL, FALSE);
-                UpdateWindow(hwnd);
+            HDC hdc = GetDC(hwnd);
+            short prevColumn = selectedColumn;
+            short prevRow = selectedRow;
+
+            selectedColumn = getColumn(lParam);
+            selectedRow = getRow(lParam);
+
+            if (prevColumn != -1 && prevRow != -1) {
+                drawSquare(hdc, prevColumn, prevRow);
             }
+
+            // try make move
+            makeMove(hdc, possibleMoves, prevColumn, prevRow, selectedColumn, selectedRow);
+
+            // draw new possible moves
+            if (selectedColumn != -1 && selectedRow != -1) {
+                possibleMoves = getPossibleMoves(selectedColumn, selectedRow);
+                drawPossibleMove(hdc, possibleMoves);
+            }
+
+            if (selectedColumn != -1 && selectedRow != -1) {
+                drawSquare(hdc, selectedColumn, selectedRow);
+            }
+
+            ReleaseDC(hwnd, hdc);
+
             return 0;
         }
         case WM_PAINT:
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
-            HBRUSH green  = CreateSolidBrush(GREEN);
-            HBRUSH white  = CreateSolidBrush(WHITE);
-            HBRUSH yellow = CreateSolidBrush(YELLOW);
-            Graphics graphics(hdc);
 
+            drawOuter(hdc);
+            drawInner(hdc);
+            drawCoordinates(hdc);
             // Columns
             for (unsigned int i = 0; i < 8; ++i) {
                 //Rows
                 for (unsigned int j = 0; j < 8; ++j) {
-                    RECT rect;
-                    rect.left = board_xPos + box_width * i;
-                    rect.top = board_yPos + box_width * j;
-                    rect.right = board_xPos + box_width * (i + 1);
-                    rect.bottom = board_yPos + box_width * (j + 1);
-                    if (i == selectedColumn && j == selectedRow) {
-                        FillRect(hdc, &rect, yellow);
-                    } else if ((i % 2 == 0 && j % 2 == 0) || (i % 2 !=0 && j % 2 != 0)) {
-                        FillRect(hdc, &rect, white);
-                    } else {
-                        FillRect(hdc, &rect, green);
-                    }
-
-                    // Put icons
-                    if (board[i][j] != 0) {
-                        Gdiplus::Image* current = getPieceImage(board[i][j]);
-                        if (current != nullptr) {
-                            graphics.DrawImage(current, rect.left, rect.top, box_width, box_width);
-                        }
-                    }
+                    drawSquare(hdc, i, j);
                 }
             }
-            DeleteObject(green);
-            DeleteObject(white);
-            DeleteObject(yellow);
 
             EndPaint(hwnd, &ps);
             return 0;
