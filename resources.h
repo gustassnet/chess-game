@@ -1,0 +1,13 @@
+#define WHITE_PAWN   101
+#define WHITE_KNIGHT 102
+#define WHITE_BISHOP 103
+#define WHITE_ROOK   104
+#define WHITE_QUEEN  105
+#define WHITE_KING   106
+
+#define BLACK_PAWN   107
+#define BLACK_KNIGHT 108
+#define BLACK_BISHOP 109
+#define BLACK_ROOK   110
+#define BLACK_QUEEN  111
+#define BLACK_KING   112

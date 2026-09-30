@@ -1,0 +1,15 @@
+#include "resources.h"
+
+WHITE_PAWN   PNG "images/white_pawn.png"
+WHITE_KNIGHT PNG "images/white_knight.png"
+WHITE_BISHOP PNG "images/white_bishop.png"
+WHITE_ROOK   PNG "images/white_rook.png"
+WHITE_QUEEN  PNG "images/white_queen.png"
+WHITE_KING   PNG "images/white_king.png"
+
+BLACK_PAWN   PNG "images/black_pawn.png"
+BLACK_KNIGHT PNG "images/black_knight.png"
+BLACK_BISHOP PNG "images/black_bishop.png"
+BLACK_ROOK   PNG "images/black_rook.png"
+BLACK_QUEEN  PNG "images/black_queen.png"
+BLACK_KING   PNG "images/black_king.png"
