@@ -41,7 +41,10 @@ std::vector<std::pair<int, int>> getPossibleMoves(unsigned column, unsigned row)
             return getBishopMoves(column, row);
         }
         if (board[column][row] == WHITE_ROOK) {
-            return getStraightMoves(column, row);
+            return getRookMoves(column, row);
+        }
+        if (board[column][row] == WHITE_QUEEN) {
+            return getQueenMoves(column, row);
         }
     } else {
         if (board[column][row] == BLACK_PAWN) {
@@ -54,7 +57,10 @@ std::vector<std::pair<int, int>> getPossibleMoves(unsigned column, unsigned row)
             return getBishopMoves(column, row);
         }
         if (board[column][row] == BLACK_ROOK) {
-            return getStraightMoves(column, row);
+            return getRookMoves(column, row);
+        }
+        if (board[column][row] == BLACK_QUEEN) {
+            return getQueenMoves(column, row);
         }
     }
     return {};
@@ -155,10 +161,6 @@ std::vector<std::pair<int, int>> getKnightMoves(unsigned column, unsigned row) {
 }
 
 std::vector<std::pair<int, int>> getBishopMoves(unsigned column, unsigned row) {
-    return getDiagonalMoves(column, row);
-}
-
-std::vector<std::pair<int, int>> getDiagonalMoves(unsigned column, unsigned row) {
     std::vector<std::pair<int, int>> possibleMoves;
     std::vector<std::pair<int, int>> moves;
 
@@ -177,7 +179,7 @@ std::vector<std::pair<int, int>> getDiagonalMoves(unsigned column, unsigned row)
     return possibleMoves;
 }
 
-std::vector<std::pair<int, int>> getStraightMoves(unsigned column, unsigned row) {
+std::vector<std::pair<int, int>> getRookMoves(unsigned column, unsigned row) {
     std::vector<std::pair<int, int>> possibleMoves;
     std::vector<std::pair<int, int>> moves;
 
@@ -191,6 +193,19 @@ std::vector<std::pair<int, int>> getStraightMoves(unsigned column, unsigned row)
     possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
     
     moves = checkStraight(column, row, 0, -1);
+    possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
+
+    return possibleMoves;
+}
+
+std::vector<std::pair<int, int>> getQueenMoves(unsigned column, unsigned row) {
+    std::vector<std::pair<int, int>> possibleMoves;
+    std::vector<std::pair<int, int>> moves;
+
+    moves = getBishopMoves(column, row);
+    possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
+
+    moves = getRookMoves(column, row);
     possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
 
     return possibleMoves;
