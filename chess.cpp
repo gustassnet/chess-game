@@ -40,6 +40,9 @@ std::vector<std::pair<int, int>> getPossibleMoves(unsigned column, unsigned row)
         if (board[column][row] == WHITE_BISHOP) {
             return getBishopMoves(column, row);
         }
+        if (board[column][row] == WHITE_ROOK) {
+            return getStraightMoves(column, row);
+        }
     } else {
         if (board[column][row] == BLACK_PAWN) {
             return getPawnMoves(column, row);
@@ -49,6 +52,9 @@ std::vector<std::pair<int, int>> getPossibleMoves(unsigned column, unsigned row)
         }
         if (board[column][row] == BLACK_BISHOP) {
             return getBishopMoves(column, row);
+        }
+        if (board[column][row] == BLACK_ROOK) {
+            return getStraightMoves(column, row);
         }
     }
     return {};
@@ -156,22 +162,41 @@ std::vector<std::pair<int, int>> getDiagonalMoves(unsigned column, unsigned row)
     std::vector<std::pair<int, int>> possibleMoves;
     std::vector<std::pair<int, int>> moves;
 
-    moves = checkDiagonal(column, row, 1, 1);
+    moves = checkStraight(column, row, 1, 1);
     possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
 
-    moves = checkDiagonal(column, row, 1, -1);
+    moves = checkStraight(column, row, 1, -1);
     possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
 
-    moves = checkDiagonal(column, row, -1, 1);
+    moves = checkStraight(column, row, -1, 1);
     possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
     
-    moves = checkDiagonal(column, row, -1, -1);
+    moves = checkStraight(column, row, -1, -1);
     possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
 
     return possibleMoves;
 }
 
-std::vector<std::pair<int, int>> checkDiagonal(unsigned column, unsigned row, short columnDirection, short rowDirection) {
+std::vector<std::pair<int, int>> getStraightMoves(unsigned column, unsigned row) {
+    std::vector<std::pair<int, int>> possibleMoves;
+    std::vector<std::pair<int, int>> moves;
+
+    moves = checkStraight(column, row, 1, 0);
+    possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
+
+    moves = checkStraight(column, row, -1, 0);
+    possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
+
+    moves = checkStraight(column, row, 0, 1);
+    possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
+    
+    moves = checkStraight(column, row, 0, -1);
+    possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
+
+    return possibleMoves;
+}
+
+std::vector<std::pair<int, int>> checkStraight(unsigned column, unsigned row, short columnDirection, short rowDirection) {
     std::vector<std::pair<int, int>> possibleMoves;
 
     for (int i = column + columnDirection, j = row + rowDirection; i >= 0 && i < 8 && j >= 0 && j < 8; i += columnDirection, j += rowDirection) {
