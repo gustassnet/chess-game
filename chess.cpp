@@ -32,26 +32,32 @@ void initBoard() {
 std::vector<std::pair<int, int>> getPossibleMoves(unsigned column, unsigned row) {
     if (whiteTurn) {
         if (board[column][row] == WHITE_PAWN) {
-            return getPawnMoves(column, row, true);
+            return getPawnMoves(column, row);
         }
         if (board[column][row] == WHITE_KNIGHT) {
-            return getKnightMoves(column, row, true);
+            return getKnightMoves(column, row);
+        }
+        if (board[column][row] == WHITE_BISHOP) {
+            return getBishopMoves(column, row);
         }
     } else {
         if (board[column][row] == BLACK_PAWN) {
-            return getPawnMoves(column, row, false);
+            return getPawnMoves(column, row);
         }
         if (board[column][row] == BLACK_KNIGHT) {
-            return getKnightMoves(column, row, false);
+            return getKnightMoves(column, row);
+        }
+        if (board[column][row] == BLACK_BISHOP) {
+            return getBishopMoves(column, row);
         }
     }
     return {};
 }
 
-std::vector<std::pair<int, int>> getPawnMoves(unsigned column, unsigned row, bool isWhite) {
+std::vector<std::pair<int, int>> getPawnMoves(unsigned column, unsigned row) {
     std::vector<std::pair<int, int>> possibleMoves;
 
-    if (isWhite) {
+    if (isWhitePiece(board[column][row])) {
         if (row > 0 && board[column][row - 1] == 0) {
             possibleMoves.push_back({column, row - 1});
             if (row == 6 && board[column][row - 2] == 0) {
@@ -85,10 +91,10 @@ std::vector<std::pair<int, int>> getPawnMoves(unsigned column, unsigned row, boo
     return possibleMoves;
 }
 
-std::vector<std::pair<int, int>> getKnightMoves(unsigned column, unsigned row, bool isWhite) {
+std::vector<std::pair<int, int>> getKnightMoves(unsigned column, unsigned row) {
     std::vector<std::pair<int, int>> possibleMoves;
 
-    if (isWhite) {
+    if (isWhitePiece(board[column][row])) {
         if (column < 7 && row > 1 && !isWhitePiece(board[column + 1][row - 2])) {
             possibleMoves.push_back({column + 1, row - 2});
         }
@@ -137,6 +143,52 @@ std::vector<std::pair<int, int>> getKnightMoves(unsigned column, unsigned row, b
         }
         if (column > 0 && row > 1 && !isBlackPiece(board[column - 1][row - 2])) {
             possibleMoves.push_back({column - 1, row - 2});
+        }
+    }
+    return possibleMoves;
+}
+
+std::vector<std::pair<int, int>> getBishopMoves(unsigned column, unsigned row) {
+    return getDiagonalMoves(column, row);
+}
+
+std::vector<std::pair<int, int>> getDiagonalMoves(unsigned column, unsigned row) {
+    std::vector<std::pair<int, int>> possibleMoves;
+    std::vector<std::pair<int, int>> moves;
+
+    moves = checkDiagonal(column, row, 1, 1);
+    possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
+
+    moves = checkDiagonal(column, row, 1, -1);
+    possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
+
+    moves = checkDiagonal(column, row, -1, 1);
+    possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
+    
+    moves = checkDiagonal(column, row, -1, -1);
+    possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
+
+    return possibleMoves;
+}
+
+std::vector<std::pair<int, int>> checkDiagonal(unsigned column, unsigned row, short columnDirection, short rowDirection) {
+    std::vector<std::pair<int, int>> possibleMoves;
+
+    for (int i = column + columnDirection, j = row + rowDirection; i >= 0 && i < 8 && j >= 0 && j < 8; i += columnDirection, j += rowDirection) {
+        if (!isWhitePiece(board[i][j]) && !isBlackPiece(board[i][j])) {
+            possibleMoves.push_back({i, j});
+        } else {
+            if (isWhitePiece(board[column][row])) {
+                if (isBlackPiece(board[i][j])) {
+                    possibleMoves.push_back({i, j});
+                }
+                break;
+            } else {
+                if (isWhitePiece(board[i][j])) {
+                    possibleMoves.push_back({i, j});
+                }
+                break;
+            }
         }
     }
     return possibleMoves;
