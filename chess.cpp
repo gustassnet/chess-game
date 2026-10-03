@@ -29,6 +29,18 @@ void initBoard() {
     }
 }
 
+std::vector<std::pair<int, int>> getValidMoves(unsigned column, unsigned row) {
+    std::vector<std::pair<int, int>> validMoves;
+    std::vector<std::pair<int, int>> possibleMoves = getPossibleMoves(column, row);
+    for (auto move : possibleMoves) {
+        if (validMove(column, row, move.first, move.second)) {
+            validMoves.push_back(move);
+        }
+    }
+    return validMoves;
+}
+
+// Depends on whos turn to play
 std::vector<std::pair<int, int>> getPossibleMoves(unsigned column, unsigned row) {
     if (whiteTurn) {
         if (board[column][row] == WHITE_PAWN) {
@@ -62,6 +74,32 @@ std::vector<std::pair<int, int>> getPossibleMoves(unsigned column, unsigned row)
         if (board[column][row] == BLACK_QUEEN) {
             return getQueenMoves(column, row);
         }
+    }
+    return {};
+}
+
+// Returns all moves for a piece, regardless of whose turn it is
+std::vector<std::pair<int, int>> getPieceMoves(unsigned column, unsigned row) {
+    if (board[column][row] == WHITE_PAWN) {
+        return getPawnMoves(column, row);
+    } else if (board[column][row] == WHITE_KNIGHT) {
+        return getKnightMoves(column, row);
+    } else if (board[column][row] == WHITE_BISHOP) {
+        return getBishopMoves(column, row);
+    } else if (board[column][row] == WHITE_ROOK) {
+        return getRookMoves(column, row);
+    } else if (board[column][row] == WHITE_QUEEN) {
+        return getQueenMoves(column, row);
+    } else if (board[column][row] == BLACK_PAWN) {
+        return getPawnMoves(column, row);
+    } else if (board[column][row] == BLACK_KNIGHT) {
+        return getKnightMoves(column, row);
+    } else if (board[column][row] == BLACK_BISHOP) {
+        return getBishopMoves(column, row);
+    } else if (board[column][row] == BLACK_ROOK) {
+        return getRookMoves(column, row);
+    } else if (board[column][row] == BLACK_QUEEN) {
+        return getQueenMoves(column, row);
     }
     return {};
 }
@@ -248,6 +286,45 @@ int makeMove(std::vector<std::pair<int, int>> possibleMoves, unsigned prevColumn
 
 int getPieceId(unsigned column, unsigned row) {
     return board[column][row];
+}
+
+bool validMove(unsigned prevColumn, unsigned prevRow, unsigned newColumn, unsigned newRow) {
+    int temp1 = board[newColumn][newRow];
+    int temp2 = board[prevColumn][prevRow];
+
+    board[newColumn][newRow] = board[prevColumn][prevRow];
+    board[prevColumn][prevRow] = 0;
+    if (kingInCheck()) {
+        board[prevColumn][prevRow] = temp2;
+        board[newColumn][newRow] = temp1;
+        return false;
+    }
+    board[prevColumn][prevRow] = temp2;
+    board[newColumn][newRow] = temp1;
+    return true;
+}
+
+bool kingInCheck() {
+    for (unsigned i = 0; i < 8; ++i) {
+        for (unsigned j = 0; j < 8; ++j) {
+            if (!whiteTurn && isWhitePiece(board[i][j])) {
+                std::vector<std::pair<int, int>> possibleMoves = getPieceMoves(i, j);
+                for (auto move : possibleMoves) {
+                    if (board[move.first][move.second] == BLACK_KING) {
+                        return true;
+                    }
+                }
+            } else if (whiteTurn && isBlackPiece(board[i][j])) {
+                std::vector<std::pair<int, int>> possibleMoves = getPieceMoves(i, j);
+                for (auto move : possibleMoves) {
+                    if (board[move.first][move.second] == WHITE_KING) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }
 
 bool isWhitePiece(int id) {

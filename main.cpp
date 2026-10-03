@@ -62,7 +62,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             // draw new possible moves
             if (selectedColumn != -1 && selectedRow != -1) {
-                possibleMoves = getPossibleMoves(selectedColumn, selectedRow);
+                possibleMoves = getValidMoves(selectedColumn, selectedRow);
                 drawPossibleMove(hdc, possibleMoves);
             }
 
