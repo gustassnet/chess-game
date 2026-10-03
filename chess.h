@@ -14,6 +14,7 @@ std::vector<std::pair<int, int>> getKnightMoves(unsigned column, unsigned row);
 std::vector<std::pair<int, int>> getBishopMoves(unsigned column, unsigned row);
 std::vector<std::pair<int, int>> getRookMoves(unsigned column, unsigned row);
 std::vector<std::pair<int, int>> getQueenMoves(unsigned column, unsigned row);
+std::vector<std::pair<int, int>> getKingMoves(unsigned column, unsigned row);
 std::vector<std::pair<int, int>> checkStraight(unsigned column, unsigned row, short columnDirection, short rowDirection);
 
 int makeMove(std::vector<std::pair<int, int>> possibleMoves, unsigned prevColumn, unsigned prevRow, unsigned newColumn, unsigned newRow);

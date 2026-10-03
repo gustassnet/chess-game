@@ -45,34 +45,30 @@ std::vector<std::pair<int, int>> getPossibleMoves(unsigned column, unsigned row)
     if (whiteTurn) {
         if (board[column][row] == WHITE_PAWN) {
             return getPawnMoves(column, row);
-        }
-        if (board[column][row] == WHITE_KNIGHT) {
+        } else if (board[column][row] == WHITE_KNIGHT) {
             return getKnightMoves(column, row);
-        }
-        if (board[column][row] == WHITE_BISHOP) {
+        } else if (board[column][row] == WHITE_BISHOP) {
             return getBishopMoves(column, row);
-        }
-        if (board[column][row] == WHITE_ROOK) {
+        } else if (board[column][row] == WHITE_ROOK) {
             return getRookMoves(column, row);
-        }
-        if (board[column][row] == WHITE_QUEEN) {
+        } else if (board[column][row] == WHITE_QUEEN) {
             return getQueenMoves(column, row);
+        } else if (board[column][row] == WHITE_KING) {
+            return getKingMoves(column, row);
         }
     } else {
         if (board[column][row] == BLACK_PAWN) {
             return getPawnMoves(column, row);
-        }
-        if (board[column][row] == BLACK_KNIGHT) {
+        } else if (board[column][row] == BLACK_KNIGHT) {
             return getKnightMoves(column, row);
-        }
-        if (board[column][row] == BLACK_BISHOP) {
+        } else if (board[column][row] == BLACK_BISHOP) {
             return getBishopMoves(column, row);
-        }
-        if (board[column][row] == BLACK_ROOK) {
+        } else if (board[column][row] == BLACK_ROOK) {
             return getRookMoves(column, row);
-        }
-        if (board[column][row] == BLACK_QUEEN) {
+        } else if (board[column][row] == BLACK_QUEEN) {
             return getQueenMoves(column, row);
+        } else if ((board[column][row] == BLACK_KING)) {
+            return getKingMoves(column, row);
         }
     }
     return {};
@@ -80,26 +76,18 @@ std::vector<std::pair<int, int>> getPossibleMoves(unsigned column, unsigned row)
 
 // Returns all moves for a piece, regardless of whose turn it is
 std::vector<std::pair<int, int>> getPieceMoves(unsigned column, unsigned row) {
-    if (board[column][row] == WHITE_PAWN) {
+    if (board[column][row] == WHITE_PAWN || board[column][row] == BLACK_PAWN) {
         return getPawnMoves(column, row);
-    } else if (board[column][row] == WHITE_KNIGHT) {
+    } else if (board[column][row] == WHITE_KNIGHT || board[column][row] == BLACK_KNIGHT) {
         return getKnightMoves(column, row);
-    } else if (board[column][row] == WHITE_BISHOP) {
+    } else if (board[column][row] == WHITE_BISHOP || board[column][row] == BLACK_BISHOP) {
         return getBishopMoves(column, row);
-    } else if (board[column][row] == WHITE_ROOK) {
+    } else if (board[column][row] == WHITE_ROOK || board[column][row] == BLACK_ROOK) {
         return getRookMoves(column, row);
-    } else if (board[column][row] == WHITE_QUEEN) {
+    } else if (board[column][row] == WHITE_QUEEN || board[column][row] == BLACK_QUEEN) {
         return getQueenMoves(column, row);
-    } else if (board[column][row] == BLACK_PAWN) {
-        return getPawnMoves(column, row);
-    } else if (board[column][row] == BLACK_KNIGHT) {
-        return getKnightMoves(column, row);
-    } else if (board[column][row] == BLACK_BISHOP) {
-        return getBishopMoves(column, row);
-    } else if (board[column][row] == BLACK_ROOK) {
-        return getRookMoves(column, row);
-    } else if (board[column][row] == BLACK_QUEEN) {
-        return getQueenMoves(column, row);
+    } else if (board[column][row] == WHITE_KING || board[column][row] == BLACK_KING) {
+        return getKingMoves(column, row);
     }
     return {};
 }
@@ -246,6 +234,31 @@ std::vector<std::pair<int, int>> getQueenMoves(unsigned column, unsigned row) {
     moves = getRookMoves(column, row);
     possibleMoves.insert(possibleMoves.end(), moves.begin(), moves.end());
 
+    return possibleMoves;
+}
+
+std::vector<std::pair<int, int>> getKingMoves(unsigned column, unsigned row) {
+    std::vector<std::pair<int, int>> possibleMoves;
+
+    for (int i = -1; i <= 1; ++i) {
+        for (int j = -1; j <= 1; ++j) {
+            if (i == 0 && j == 0) {
+                continue;
+            }
+
+            if (column + i >= 0 && column + i < 8 && row + j >= 0 && row + j < 8) {
+                if (isWhitePiece(board[column][row])) {
+                    if (!isWhitePiece(board[column + i][row + j])) {
+                        possibleMoves.push_back({column + i, row + j});
+                    }
+                } else {
+                    if (!isBlackPiece(board[column + i][row + j])) {
+                        possibleMoves.push_back({column + i, row + j});
+                    }
+                }
+            }
+        }
+    }
     return possibleMoves;
 }
 
